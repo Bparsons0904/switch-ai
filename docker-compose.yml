@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    ports:
+      - "${PORT:-8111}:8000"
+    volumes:
+      - ./app:/app
