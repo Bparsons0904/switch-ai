@@ -3,32 +3,27 @@ type: docker
 name: default
 steps:
   - name: build_switch_ai
-    image: docker:dind
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
+    image: docker:latest
+    privileged: true
     commands:
       - docker build -t switch-ai:${DRONE_COMMIT_SHA:0:8} .
       - docker tag switch-ai:${DRONE_COMMIT_SHA:0:8} switch-ai:latest
   - name: deploy_staging
     image: docker/compose:1.29.2
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
+    privileged: true
     environment:
       PORT:
         from_secret: PORT
     commands:
       - docker-compose down switch-ai || true
       - docker-compose up -d --force-recreate switch-ai
+      - docker-compose ps
       - docker image prune -f
     when:
       branch:
         - main
-volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
 trigger:
   branch:
     - main
+  event:
+    - push
