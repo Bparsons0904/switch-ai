@@ -2,30 +2,14 @@ kind: pipeline
 type: docker
 name: default
 steps:
-  - name: build_switch_ai
-    image: docker:latest
-    commands:
-      - docker build -t switch-ai:${DRONE_COMMIT_SHA:0:8} .
-      - docker tag switch-ai:${DRONE_COMMIT_SHA:0:8} switch-ai:latest
-  - name: deploy_staging
+  - name: deploy
     image: docker/compose:1.29.2
     environment:
       PORT:
         from_secret: PORT
     commands:
-      - docker-compose version
-      - docker-compose config
-      - docker-compose down --remove-orphans
-      - docker-compose up -d --force-recreate --remove-orphans
-      - docker-compose ps
-      - docker-compose exec -T switch-ai ls -la /app
-      - docker-compose exec -T switch-ai cat /app/main.py
-      - docker-compose exec -T switch-ai python -c "import sys; print(sys.path)"
-  - name: check_logs
-    image: docker:latest
-    commands:
-      - sleep 10
-      - docker-compose logs switch-ai
+      - docker compose down
+      - docker compose up --build
 trigger:
   branch:
     - main
