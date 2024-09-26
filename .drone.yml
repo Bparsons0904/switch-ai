@@ -1,0 +1,32 @@
+kind: pipeline
+type: docker
+name: default
+steps:
+  - name: build_switch_ai
+    image: docker:dind
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t switch-ai:${DRONE_COMMIT_SHA:0:8} .
+      - docker tag switch-ai:${DRONE_COMMIT_SHA:0:8} switch-ai:latest
+  - name: deploy_staging
+    image: docker/compose:1.29.2
+    environment:
+      PORT:
+        from_secret: PORT
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - apk add --no-cache docker-compose
+      - docker-compose down switch-ai
+      - docker-compose up -d --force-recreate switch-ai
+      - docker image prune -f
+    when:
+      branch:
+        - main
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
