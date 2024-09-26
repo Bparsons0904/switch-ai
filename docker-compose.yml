@@ -4,4 +4,6 @@ services:
     ports:
       - "${PORT:-8111}:8000"
     volumes:
-      - .:/app
+      - ./app:/app/app
+    environment:
+      - PYTHONPATH=/app

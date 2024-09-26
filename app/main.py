@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-from model import relevance_model
 from pydantic import BaseModel
+
+from .model import relevance_model
 
 app = FastAPI()
 
