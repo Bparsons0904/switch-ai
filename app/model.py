@@ -15,8 +15,13 @@ def get_device():
 
 class RelevanceModel:
     def __init__(self):
-        model_name = "distilroberta-base"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # model_name = "distilroberta-base"
+        # self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # self.model = AutoModelForSequenceClassification.from_pretrained(
+        #     model_name, num_labels=1
+        # )
+        model_name = "microsoft/deberta-v3-large"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=1
         )
@@ -211,7 +216,6 @@ class RelevanceModel:
         2. Provide personal opinions using words like {', '.join(self.sentiment_words)}, etc.
         3. Include switch-related terms such as {', '.join(self.switch_related)}, etc.
         4. Include an overall assessment
-        5. In general, a longer review would score higher
         6. The review must be related to mechanical keyboard switches
 
         Rate the review from 0.0 to 10.0, where:
@@ -244,26 +248,20 @@ class RelevanceModel:
             review.lower().count(word) for word in self.switch_related
         )
 
-        # If switch-related terms are missing, scale down the score drastically
         if switch_related_count == 0:
-            mapped_score *= 0.4  # Stronger downscale for irrelevant content
+            mapped_score *= 0.4
 
-        # If there are no characteristics and no sentiment, penalize the score
         if char_count == 0 and sentiment_count == 0:
             mapped_score *= 0.5
 
-        # Add bonuses for detailed reviews, but limit length-based inflation
         if len(review.split()) > 20:
-            mapped_score = min(mapped_score * 1.1, 10)  # Capped length bonus
+            mapped_score = min(mapped_score * 1.1, 10)
 
-        # If it mentions characteristics or switch terms but lacks context, keep it average
         if char_count > 0 and switch_related_count > 0:
             mapped_score = max(mapped_score, 4.0 + min(char_count, 3))
 
-        # Boost sentiment if present but also with limits
         mapped_score += min(sentiment_count, 2)
 
-        # Short reviews with relevant keywords get a minimal relevance boost
         if len(review.split()) < 10 and (
             char_count > 0 or switch_related_count > 0 or sentiment_count > 0
         ):
@@ -272,24 +270,23 @@ class RelevanceModel:
         return round(min(max(mapped_score, 0.0), 10.0), 1)
 
 
-# Usage example
 relevance_model = RelevanceModel()
 
-reviews = [
-    "This is a great feeling switch! I like how fast and responsive it is. Love the sound of it.",
-    "These switches feel great! Nice tactile bump and not too loud. Perfect for office use.",
-    "Clicky and satisfying. The actuation force is just right for me. Highly recommend!",
-    "Meh, they're okay I guess.",
-    "I bought a new keyboard.",
-    "The weather is nice today.",
-    "I love pizza!",
-    "This switch is terrible. It's too loud and feels mushy. The actuation point is inconsistent and it's just not pleasant to type on at all.",
-    "Smooth linear feel with a slight bump at the bottom. Great for gaming and typing. The sound is a bit louder than I expected, but still acceptable for office use.",
-    "These switches feel amazing. The tactile bump is smooth but pronounced, giving excellent feedback while typing. The sound is a deep, satisfying thock without being too loud, and the weight feels just right for extended typing sessions.",
-    "The weather was really nice today. I went for a walk and enjoyed the sunshine. Highly recommend walking in good weather!",
-    "The Gateron Browns offer a great balance between tactility and smoothness. They’re perfect for both typing and gaming, and the subtle bump is ideal if you prefer something quieter than clicky switches.",
-]
-
-for review in reviews:
-    score = relevance_model.predict_relevance(review)
-    print(f"Review: {review}\nScore: {score}\n")
+# reviews = [
+#     "This is a great feeling switch! I like how fast and responsive it is. Love the sound of it.",
+#     "These switches feel great! Nice tactile bump and not too loud. Perfect for office use.",
+#     "Clicky and satisfying. The actuation force is just right for me. Highly recommend!",
+#     "Meh, they're okay I guess.",
+#     "I bought a new keyboard.",
+#     "The weather is nice today.",
+#     "I love pizza!",
+#     "This switch is terrible. It's too loud and feels mushy. The actuation point is inconsistent and it's just not pleasant to type on at all.",
+#     "Smooth linear feel with a slight bump at the bottom. Great for gaming and typing. The sound is a bit louder than I expected, but still acceptable for office use.",
+#     "These switches feel amazing. The tactile bump is smooth but pronounced, giving excellent feedback while typing. The sound is a deep, satisfying thock without being too loud, and the weight feels just right for extended typing sessions.",
+#     "The weather was really nice today. I went for a walk and enjoyed the sunshine. Highly recommend walking in good weather!",
+#     "The Gateron Browns offer a great balance between tactility and smoothness. They’re perfect for both typing and gaming, and the subtle bump is ideal if you prefer something quieter than clicky switches.",
+# ]
+#
+# for review in reviews:
+#     score = relevance_model.predict_relevance(review)
+#     print(f"Review: {review}\nScore: {score}\n")
