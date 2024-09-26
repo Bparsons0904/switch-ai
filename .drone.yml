@@ -19,9 +19,15 @@ steps:
       - docker-compose up -d --force-recreate switch-ai
       - docker-compose ps
       - docker image prune -f
+  - name: check_logs
+    image: docker:latest
+    commands:
+      - sleep 10
+      - docker-compose logs switch-ai
     when:
-      branch:
-        - main
+      status:
+        - success
+        - failure
 trigger:
   branch:
     - main
