@@ -5,29 +5,39 @@ steps:
   - name: build_switch_ai
     image: docker:latest
     privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
       - docker build -t switch-ai:${DRONE_COMMIT_SHA:0:8} .
       - docker tag switch-ai:${DRONE_COMMIT_SHA:0:8} switch-ai:latest
-  - name: deploy_staging
+  - name: deploy
     image: docker/compose:1.29.2
     privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     environment:
       PORT:
         from_secret: PORT
     commands:
-      - docker-compose down switch-ai || true
-      - docker-compose up -d --force-recreate switch-ai
+      - docker-compose version
+      - docker-compose config
+      - docker-compose down || true
+      - docker-compose up -d --force-recreate
       - docker-compose ps
-      - docker image prune -f
   - name: check_logs
     image: docker:latest
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
       - sleep 10
       - docker-compose logs switch-ai
-    when:
-      status:
-        - success
-        - failure
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 trigger:
   branch:
     - main
