@@ -12,12 +12,12 @@ steps:
     environment:
       PORT:
         from_secret: PORT
-  commands:
-    - docker-compose -p switch-ai version
-    - docker-compose -p switch-ai config
-    - docker-compose -p switch-ai down --remove-orphans
-    - docker-compose -p switch-ai up -d --force-recreate --remove-orphans
-    - docker-compose -p switch-ai ps
+    commands:
+      - docker-compose -p switch-ai version
+      - docker-compose -p switch-ai config
+      - docker-compose -p switch-ai down --remove-orphans
+      - docker-compose -p switch-ai up -d --force-recreate --remove-orphans
+      - docker-compose -p switch-ai ps
   - name: check_logs
     image: docker:latest
     commands:
