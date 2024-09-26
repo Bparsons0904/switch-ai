@@ -8,8 +8,8 @@ steps:
       PORT:
         from_secret: PORT
     commands:
-      - docker compose down
-      - docker compose up --build
+      - docker-compose down
+      - docker-compose up --build
 trigger:
   branch:
     - main
