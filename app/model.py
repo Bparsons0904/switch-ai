@@ -20,9 +20,6 @@ class RelevanceModel:
     def __init__(self):
         # model_name = "distilroberta-base"
         # self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        # self.model = AutoModelForSequenceClassification.from_pretrained(
-        #     model_name, num_labels=1
-        # )
         model_name = "microsoft/deberta-v3-large"
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
         self.model = AutoModelForSequenceClassification.from_pretrained(
