@@ -1,4 +1,4 @@
 {
-  "executionEnvironments": [{ "root": "src" }]
+  "executionEnvironments": [{ "root": "src" }],
   "reportMissingImports": false
 }
