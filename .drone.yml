@@ -12,15 +12,14 @@ steps:
       - docker tag switch-ai:${DRONE_COMMIT_SHA:0:8} switch-ai:latest
   - name: deploy_staging
     image: docker/compose:1.29.2
-    environment:
-      PORT:
-        from_secret: PORT
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
+    environment:
+      PORT:
+        from_secret: PORT
     commands:
-      - apk add --no-cache docker-compose
-      - docker-compose down switch-ai
+      - docker-compose down switch-ai || true
       - docker-compose up -d --force-recreate switch-ai
       - docker image prune -f
     when:
@@ -30,3 +29,6 @@ volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
+trigger:
+  branch:
+    - main
