@@ -1,6 +1,8 @@
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+print("This is a test")
+
 
 def get_device():
     """Determine whether to use GPU or CPU."""
